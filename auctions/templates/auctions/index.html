@@ -1,0 +1,31 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+    <h2 class="display">Active Listings</h2>
+
+    {% for item in listing %}
+    <div class="row align-middle active-listings-row">
+        <div class="col-md-3 col-sm-6">
+            {% if item.imgSrc %}
+                <img src="{{ item.imgSrc }} " alt="" class="activeListingImg">
+               {% endif %}
+        </div>
+        <div class="col-md-9 col-sm-6">
+           
+            <h4 class="active-listing-title"><a href="{% url 'listing' item.id %}">{{ item.name }} </a></h4> 
+            <p class="text-muted"><small>posted by {{ item.owner }} on {{ item.datePosted }}</small></p>
+            <p><strong>Price:</strong> ${{ item.startBid }}</p>
+        </div>
+    </div>
+    <hr>          
+    {% endfor %}
+{% endblock %}

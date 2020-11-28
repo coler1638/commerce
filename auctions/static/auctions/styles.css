@@ -1,0 +1,125 @@
+body {
+  padding:1rem;
+  background-color:#E7EDF5;
+  color:#303030;
+}
+
+a {
+  color:#6392D6;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* index  page */
+
+.activeListingImg {
+  max-width: 150px;
+}
+
+.active-listings-row {
+  padding: 2rem 2rem;
+}
+
+.active-listing-title {
+  padding-bottom:0;
+  margin-bottom: 0;
+
+}
+
+.messages {
+  list-style: none;
+  margin:1rem 0rem;
+  padding: 1rem 2rem;
+  background-color: skyblue;
+  border: 2px white solid;
+  border-radius: 5px;
+  font-weight: bold;
+  color: white;
+  opacity: 0.75;
+}
+
+/* listing page */
+
+ul.listing {
+  list-style: none;
+  padding:0;
+}
+
+.button {
+  display:block;
+  font-size: small;
+  color:white;
+  padding:0.5rem 1rem;
+  margin-bottom:1rem;
+  border-radius: 1rem;
+  border:2px dodgerblue solid;
+  background-color:dodgerblue;
+  width:300px;
+}
+
+.button:hover {
+  color:white;
+  text-decoration: none;
+  background-color: darkblue;
+  border: 2px darkblue solid;
+  transition: 0.3s ease-in-out;
+}
+
+.btn-danger {
+  background-color: red;
+  border-color: red;
+}
+
+.btn-green {
+  background-color: yellowgreen;
+  border-color: yellowgreen;
+}
+
+.btn-danger:hover {
+  background-color: darkred;
+  border-color:darkred;
+  transition: 0.3s ease-in-out;
+}
+
+.btn-green:hover {
+  background-color: green;
+  border-color: green;
+  transition: 0.3s ease-in-out;
+}
+
+.listingImg {
+  max-width: 300px;
+}
+
+.commentForm {
+  margin: 1rem 0;
+}
+
+.commentForm input {
+  width:300px;
+}
+
+.commentForm label {
+  padding-right:1rem;
+}
+
+/* new listing page */
+
+.form label {
+  width:150px;
+  vertical-align: middle;
+}
+
+.form input, textarea {
+  width:300px;
+}
+
+.form textarea {
+  height:100px;
+}
+
+#createsubmit {
+  margin-left: 150px;
+}
