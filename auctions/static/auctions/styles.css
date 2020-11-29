@@ -123,3 +123,12 @@ ul.listing {
 #createsubmit {
   margin-left: 150px;
 }
+
+.login-page {
+text-align: center;
+}
+
+#login-form {
+  width: 30%;
+  margin: 1rem auto;
+}

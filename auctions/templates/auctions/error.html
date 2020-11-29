@@ -1,0 +1,11 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Sorry!</h2>
+
+    You must be <a href="{% url 'login' %}">logged in</a> to view this page.
+
+    Don't have an account? <a href="{% url 'register' %}">Register here.</a>
+
+{% endblock %}

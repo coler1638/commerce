@@ -21,7 +21,7 @@
     {{ item.description }}<br>
     Category: {{ item.get_category_display }}</p>
     
-    {% if item.isOpen == True %} 
+   
     <form action="{% url 'listing' item.id %}" method="post">
         {% csrf_token %}
         <!-- TODO: alter value in input tag below to dynamically change depending
@@ -37,6 +37,7 @@
         <input type="submit" name="watchlistButton" id="watchlistButton" class="button"
         value="Add/remove from watchlist"></input>
     </form>
+    {% if item.isOpen == True %} 
    <h4>${{ item.startBid }}</h4>
    <p class="text-muted"><small>
        {{ numBids }} bid(s) so far. 

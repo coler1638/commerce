@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from auctions.models import User, Listing, Bid, Comment, Watchlist
 
-# Define iterables
+# Define iterable for form
 CATEGORY_CHOICES = (
         ('Q', 'Quick sell'),
         ('F', 'Fashion'),
@@ -41,6 +41,8 @@ class CategoryForm(forms.Form):
     category = forms.ChoiceField(choices=CATEGORY_CHOICES, label='Choose a category')
 
 # Define views
+
+# index
 def index(request):
     # get all listings
     listings = Listing.objects.filter(isOpen = True).order_by('-id')
@@ -48,6 +50,7 @@ def index(request):
         "listing": listings
         })
 
+# login
 def login_view(request):
     if request.method == "POST":
 
@@ -67,12 +70,12 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
+# logout
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
-
+# register
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -99,6 +102,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+# create a listing
 @login_required
 def new(request):
     if request.method == 'POST':
@@ -129,112 +133,126 @@ def new(request):
         form = NewForm()
     return render(request, "auctions/new.html", {"form":form})
 
-
+# view a listing
 def listing(request, listing_id):
-    item = Listing.objects.get(id=listing_id)
-    item_id = item.id
-    user = request.user.username
-    id_user = request.user
-    bidform = BidForm()
-    userWatchlist = Watchlist.objects.filter(currentUser=id_user)
-    commentForm = CommentForm()
-    numBids = len(Bid.objects.filter(listingID=listing_id))
-    comments = Comment.objects.filter(listingID=listing_id)
+    try:
+        item = Listing.objects.get(id=listing_id)
+        item_id = item.id
+        user = request.user.username
+        id_user = request.user
+        bidform = BidForm()
+        userWatchlist = Watchlist.objects.filter(currentUser=id_user)
+        commentForm = CommentForm()
+        numBids = len(Bid.objects.filter(listingID=listing_id))
+        comments = Comment.objects.filter(listingID=listing_id)
 
-    if request.method == 'POST':
+        if request.method == 'POST':
 
-        # Comment
-        if 'commentButton' in request.POST:
-            commentForm = CommentForm(data=request.POST)
-            if commentForm.is_valid():
-                # Create new comment object
-                new_comment = Comment()
-                new_comment = commentForm.save(commit=False)
-                new_comment.listingID = item
-                new_comment.commenter = id_user
-                new_comment.save()
-                message = django.contrib.messages.success(request, 'Comment added successfully.')
-                return redirect("/", {"messages":message})
-                
-        # Watchlist
-        if 'watchlistButton' in request.POST:
-            # Check if item in userWatchlist
-            for row in userWatchlist:
-                if item == row.itemWatch:
-                    # Remove item from watchlist if item in watchlist
-                    userWatchlist.filter(itemWatch=item).delete()
-                    message = django.contrib.messages.success(request, 'Item removed from watchlist.')
-                    return redirect("/", {"messages":message})
-            # Add item to watchlist
-            w = Watchlist(currentUser=id_user, itemWatch=item)
-            w.save()
-            message = django.contrib.messages.success(request, 'Item added to watchlist.')
-            return redirect("/", {"messages":message})
+            # Comment
+            if 'commentButton' in request.POST:
+                commentForm = CommentForm(data=request.POST)
+                if commentForm.is_valid():
+                    # Create new comment object
+                    new_comment = Comment()
+                    new_comment = commentForm.save(commit=False)
+                    new_comment.listingID = item
+                    new_comment.commenter = id_user
+                    new_comment.save()
+                    message = django.contrib.messages.success(request, 'Comment added successfully.')
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'), {"messages":message})
+    
+            # Watchlist
+            if 'watchlistButton' in request.POST:
+                # Check if item in userWatchlist
+                for row in userWatchlist:
+                    if item == row.itemWatch:
+                        # Remove item from watchlist if item in watchlist
+                        userWatchlist.filter(itemWatch=item).delete()
+                        message = django.contrib.messages.success(request, 'Item removed from watchlist.')
+                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'), {"messages":message})
+            
+                # Add item to watchlist
+                w = Watchlist(currentUser=id_user, itemWatch=item)
+                w.save()
+                message = django.contrib.messages.success(request, 'Item added to watchlist.')
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'), {"messages":message})
            
-        # Place a bid      
-        if 'makeBid' in request.POST:    
-            bidform = BidForm(request.POST)
-            if bidform.is_valid(): 
-                user_bid = bidform.cleaned_data['bid']
-                price = item.startBid
+            # Place a bid      
+            if 'makeBid' in request.POST:    
+                bidform = BidForm(request.POST)
+                if bidform.is_valid(): 
+                    user_bid = bidform.cleaned_data['bid']
+                    price = item.startBid
 
-                # Validation: check user bid > item.startBid
-                if user_bid > price:
-                    # save bid to Bids
-                    newBid = Bid(listingID=item, bidder=request.user, amount=user_bid)
-                    newBid.save()
-                    # save bid to item.startBid
-                    item.startBid = user_bid
-                    item.save()
-                    message = django.contrib.messages.success(request, 'Bid placed successfully.')
-                    return redirect("/", {"messages":message})
-                else:
-                    message = django.contrib.messages.success(request, 'Error: please bid an amount larger than the current price.')
-                    return redirect("/", {"messages":message})
+                    # Validation: check user bid > item.startBid
+                    if user_bid > price:
+                        # save bid to Bids
+                        newBid = Bid(listingID=item, bidder=request.user, amount=user_bid)
+                        newBid.save()
+                        # save bid to item.startBid
+                        item.startBid = user_bid
+                        item.save()
+                        message = django.contrib.messages.success(request, 'Bid placed successfully.')
+                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'), {"messages":message})
         
-        # Close Auction Button if owner logged in
-        elif 'closeAuction' in request.POST:
-            item.isOpen = False
-            # get winning bid
-            topBid = item.startBid
-            # get top Bid model
-            topBidObject = Bid.objects.get(amount = topBid, listingID=item_id)
-            # get top Bidder from top Bid model
-            topBidder = topBidObject.bidder
-            # set item owner to top bidder
-            item.owner = topBidder
-            item.save()
-            message = django.contrib.messages.success(request, 'Closed auction successfully.')
-            return redirect("/", {"messages":message})
-   
-    else:
-        # get number of bids on items
-        try:
-            whoBid = Bid.objects.filter(bidder=request.user)[0]
-            whoBid1 = whoBid.bidder
-            numBids = len(Bid.objects.filter(listingID=listing_id))
-            return render(request, "auctions/listing.html", {
-                "item": item,
-                "user_id": user,
-                "commentForm": commentForm,
-                "bidForm": bidform,
-                "numBids": numBids,
-                "whoBid": whoBid1,
-                "watchlist": userWatchlist,
-                "comments": comments
-            })
-        except:
-            numBids = len(Bid.objects.filter(listingID=listing_id))
-            return render(request, "auctions/listing.html", {
-                "item": item,
-                "user_id": user,
-                "commentForm": commentForm,
-                "bidForm": bidform,
-                "numBids": numBids,
-                "watchlist": userWatchlist,
-                "comments": comments
-            })
+                    else:
+                        message = django.contrib.messages.success(request, 'Error: please bid an amount larger than the current price.')
+                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'), {"messages":message})
+        
+        
+            # Close Auction Button if owner logged in
+            elif 'closeAuction' in request.POST:
+                item.isOpen = False
+                # get winning bid
+                topBid = item.startBid
+                # get top Bid model
+                topBidObject = Bid.objects.filter(amount = topBid, listingID=item_id)
+                # get top Bidder from top Bid model
+                if hasattr(topBidObject, 'bidder'):
+                    topBidder = topBidObject.bidders
+                else:
+                    topBidder = item.owner
+                # set item owner to top bidder
+                item.owner = topBidder
+                item.save()
+                message = django.contrib.messages.success(request, 'Closed auction successfully.')
+                return redirect("/", {"messages":message})
+    
+        else:
+            # get number of bids on items
+            try:
+                whoBid = Bid.objects.filter(bidder=request.user)[0]
+                whoBid1 = whoBid.bidder
+                numBids = len(Bid.objects.filter(listingID=listing_id))
+                return render(request, "auctions/listing.html", {
+                    "item": item,
+                    "user_id": user,
+                    "commentForm": commentForm,
+                    "bidForm": bidform,
+                    "numBids": numBids,
+                    "whoBid": whoBid1,
+                    "watchlist": userWatchlist,
+                    "comments": comments
+                })
+            except:
+                numBids = len(Bid.objects.filter(listingID=listing_id))
+                return render(request, "auctions/listing.html", {
+                    "item": item,
+                    "user_id": user,
+                    "commentForm": commentForm,
+                    "bidForm": bidform,
+                    "numBids": numBids,
+                    "watchlist": userWatchlist,
+                    "comments": comments
+                })
+    except TypeError:
+        return redirect("/error")
 
+# error login required
+def error(request):
+    return render(request, "auctions/error.html")
+
+# watchlist
 @login_required
 def watchlist(request):
     id_user = request.user
@@ -245,7 +263,7 @@ def watchlist(request):
         "listing":listings,
     })
 
-
+# categories
 @login_required
 def categories(request):
     if request.method == 'POST':
